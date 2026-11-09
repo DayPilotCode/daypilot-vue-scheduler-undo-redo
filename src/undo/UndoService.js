@@ -2,7 +2,7 @@ import {DayPilot} from "@daypilot/daypilot-lite-vue"
 
 export class UndoService {
 
-  _items = []
+  _items = Object.create(null)
   _history = []
   _position = 0
 
@@ -24,7 +24,7 @@ export class UndoService {
 
   initialize(items) {
     // deep copy using JSON serialization/deserialization
-    this._items = []
+    this._items = Object.create(null)
     items.forEach(i => {
       let str = JSON.stringify(i)
       let key = this.keyForItem(i)
@@ -35,6 +35,7 @@ export class UndoService {
     })
 
     this._history = []
+    this._position = 0
   }
 
   update(item, text) {
@@ -70,7 +71,7 @@ export class UndoService {
       id: item.id,
       time: new DayPilot.Date(),
       previous: null,
-      current: item,
+      current: JSON.parse(JSON.stringify(item)),
       text: text,
       type: "add"
     }
@@ -92,7 +93,7 @@ export class UndoService {
     let record = {
       id: item.id,
       time: new DayPilot.Date(),
-      previous: item,
+      previous: JSON.parse(this._items[key]),
       current: null,
       text: text,
       type: "remove"
@@ -106,7 +107,7 @@ export class UndoService {
 
   undo() {
     if (!this.canUndo) {
-      throw "Can't undo"
+      return null
     }
 
     this._position -= 1
@@ -125,12 +126,12 @@ export class UndoService {
         break
     }
 
-    return record
+    return JSON.parse(JSON.stringify(record))
   }
 
   redo() {
     if (!this.canRedo) {
-      throw "Can't redo"
+      return null
     }
 
     let record = this._history[this._position]
@@ -149,7 +150,7 @@ export class UndoService {
         break
     }
 
-    return record
+    return JSON.parse(JSON.stringify(record))
   }
 
   keyForItem(item) {

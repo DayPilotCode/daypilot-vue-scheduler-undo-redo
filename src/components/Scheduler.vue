@@ -12,6 +12,8 @@
       :startDate="startDate"
       :durationBarVisible="false"
       :eventHeight="34"
+      :rowHeaderWidth="100"
+      eventDeleteHandling="Update"
       :resources="resources"
       :events="events"
       @timeRangeSelected="onTimeRangeSelected"
@@ -23,7 +25,7 @@
 
   <h2>History</h2>
   <div
-      v-for="(item, i) in service?.history"
+      v-for="(item, i) in service.history"
       :key="i"
       :class="{ highlighted: service.position === i }"
       class="history-item"
@@ -44,8 +46,8 @@ const schedulerRef = ref(null)
 const scheduler = computed(() => schedulerRef.value?.control)
 
 const timeHeaders = [{ groupBy: 'Month' }, { groupBy: 'Day', format: 'd' }]
-const days = 31
-const startDate = '2026-08-01'
+const startDate = DayPilot.Date.today().firstDayOfMonth()
+const days = startDate.daysInMonth()
 
 const resources = ref([])
 const events = ref([])
@@ -88,7 +90,8 @@ const onBeforeEventRender = (args) => {
       width: 24,
       height: 24,
       padding: 3,
-      symbol: '/icons/daypilot.svg#x-2',
+      symbol: 'icons/daypilot.svg#x-2',
+      toolTip: 'Delete event',
       backColor: '#ed9337',
       fontColor: '#fff',
       style: 'border-radius: 50%;',
@@ -103,8 +106,8 @@ const onBeforeEventRender = (args) => {
 
 const loadEvents = () => {
   const list = [
-    { id: 1, start: '2026-08-03T00:00:00', end: '2026-08-08T00:00:00', text: 'Event 1', resource: 'R4' },
-    { id: 2, start: '2026-08-04T00:00:00', end: '2026-08-10T00:00:00', text: 'Event 2', resource: 'R2' }
+    { id: 1, start: startDate.addDays(2), end: startDate.addDays(7), text: 'Event 1', resource: 'R4' },
+    { id: 2, start: startDate.addDays(3), end: startDate.addDays(9), text: 'Event 2', resource: 'R2' }
   ]
   events.value = list
   service.initialize(list)
